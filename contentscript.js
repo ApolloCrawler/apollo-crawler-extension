@@ -8,7 +8,7 @@
     var paths = [];
 
     var initialize = function() {
-        console.log("initialize()");
+        console.log('Apollo: Initializing click hook');
 
         /**
          * Prints selector of clicked element to console, very useful.
@@ -74,11 +74,8 @@
 
             paths[clickNo % maxPathsCount] = path;
 
-            // Highlight clicked element
-            // doc.css("border", "3px solid #0f0");
-
             // Print path
-            // console.log(path);
+            console.log('Apollo: Clicked - ' + path);
 
             e.preventDefault();
             e.stopPropagation();
@@ -87,6 +84,8 @@
 
             if(clickNo % maxPathsCount == 0) {
                 var unipath = diff(paths);
+
+                console.log('Apollo: Unified path - ' + path);
 
                 var elements = jQuery(unipath);
                 if(elements) {
@@ -106,8 +105,8 @@
     if (window.jQuery) {
         initialize();
     } else {
-        console.log("Injecting jQuery");
-        
+        console.log('Apolo: Injecting jQuery');
+
         var jq = document.createElement('script');
         jq.src = "//ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js";
         document.getElementsByTagName('head')[0].appendChild(jq);
