@@ -61,6 +61,8 @@
                     if (rnclass) {
                         var class_val = rnclass.value || '';
                         if(class_val != '') {
+                            class_val = class_val.trim();
+                            class_val = class_val.replace(/ +(?= )/g,'');
                             name += "." + class_val.split(' ').sort().join('.');
                         }
                     }
