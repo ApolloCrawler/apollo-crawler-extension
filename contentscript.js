@@ -94,7 +94,7 @@
                 }
 
                 var data = elements.map(function(_elem) {
-                    return this.text
+                    return this.innerText
                 });
 
                 console.log(JSON.stringify(data.toArray(), null, 4));
