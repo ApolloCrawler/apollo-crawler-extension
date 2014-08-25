@@ -59,7 +59,10 @@
                 } else {
                     var rnclass = realNode.attributes['class'];
                     if (rnclass) {
-                        name += "." + rnclass.value.split(' ').sort().join('.');
+                        var class_val = rnclass.value || '';
+                        if(class_val != '') {
+                            name += "." + class_val.split(' ').sort().join('.');
+                        }
                     }
                 }
 
