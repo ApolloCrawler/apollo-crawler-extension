@@ -2,7 +2,7 @@
     "manifest_version": 2,
 
     "name": "Apollo Crawler",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Apollo Crawler In-Browser Extractor Engine",
 
     "icons": {
@@ -16,6 +16,7 @@
     "background": {
         "page": "background.html"
     },
+
     "permissions": [
         "tabs", "http://*/*", "https://*/*"
     ],

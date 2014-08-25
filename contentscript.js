@@ -7,39 +7,67 @@
     var maxPathsCount = 2;
     var paths = [];
 
-    var initialize = function () {
-        console.log('Apollo: Initializing click hook');
+    /**
+     * Prints selector of clicked element to console, very useful.
+     */
+    var diff = function (paths) {
+        var path1 = paths[0];
+        var path2 = paths[1];
 
-        (function (console) {
+        var tokens1 = path1.split(' > ');
+        var tokens2 = path2.split(' > ');
 
-            console.save = function (data, filename) {
-
-                if (!data) {
-                    console.error('Console.save: No data')
-                    return;
-                }
-
-                if (!filename) filename = 'console.json'
-
-                if (typeof data === "object") {
-                    data = JSON.stringify(data, undefined, 4)
-                }
-
-                var blob = new Blob([data], {type: 'text/json'}),
-                    e = document.createEvent('MouseEvents'),
-                    a = document.createElement('a')
-
-                a.download = filename
-                a.href = window.URL.createObjectURL(blob)
-                a.dataset.downloadurl = ['text/json', a.download, a.href].join(':')
-                e.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
-                a.dispatchEvent(e)
+        var result = tokens1.map(function (value, index) {
+            if (value == tokens2[index]) {
+                return value;
             }
-        })(console);
 
-        /**
-         * Prints selector of clicked element to console, very useful.
-         */
+            return value.split('.')[0].split('#')[0];
+        });
+
+        return result.join(' > ');
+    };
+
+    var getLink = function (element) {
+        while (element) {
+            if (element.nodeName == 'A') {
+                return element['href'];
+            }
+            element = element.parentNode;
+        }
+    };
+
+    var initializeSave = function () {
+        console.log('Apolo: Initializing console.save()');
+
+        console.save = function (data, filename) {
+
+            if (!data) {
+                console.error('Console.save: No data')
+                return;
+            }
+
+            if (!filename) filename = 'console.json'
+
+            if (typeof data === "object") {
+                data = JSON.stringify(data, undefined, 4)
+            }
+
+            var blob = new Blob([data], {type: 'text/json'}),
+                e = document.createEvent('MouseEvents'),
+                a = document.createElement('a')
+
+            a.download = filename
+            a.href = window.URL.createObjectURL(blob)
+            a.dataset.downloadurl = ['text/json', a.download, a.href].join(':')
+            e.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
+            a.dispatchEvent(e)
+        }
+    };
+
+    var initializeGetPath = function() {
+        console.log('Apolo: Initializing jquery.getPath()');
+
         jQuery.fn.getPath = function () {
             if (this.length != 1) {
                 throw 'Requires one element.';
@@ -81,33 +109,10 @@
 
             return path;
         };
+    };
 
-        var diff = function (paths) {
-            var path1 = paths[0];
-            var path2 = paths[1];
-
-            var tokens1 = path1.split(' > ');
-            var tokens2 = path2.split(' > ');
-
-            var result = tokens1.map(function (value, index) {
-                if (value == tokens2[index]) {
-                    return value;
-                }
-
-                return value.split('.')[0].split('#')[0];
-            });
-
-            return result.join(' > ');
-        };
-
-        var getLink = function (element) {
-            while (element) {
-                if (element.nodeName == 'A') {
-                    return element['href'];
-                }
-                element = element.parentNode;
-            }
-        };
+    var initializeHook = function () {
+        console.log('Apolo: Initializing click hook');
 
         jQuery("*").click(function (e) {
             var doc = $(this);
@@ -152,6 +157,18 @@
                 console.log(rawJson);
             }
         });
+    };
+
+    var initialize = function () {
+        console.log('Apolo: Initializing');
+
+        initializeSave();
+
+        initializeGetPath();
+
+        initializeHook();
+
+        console.log('Apolo: Initialized');
     };
 
     if (window.jQuery) {
