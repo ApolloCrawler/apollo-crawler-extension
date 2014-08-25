@@ -68,6 +68,15 @@
             return result.join(' > ');
         };
 
+        var getLink = function(element) {
+            while (element) {
+                if(element.nodeName == 'A') {
+                    return element['href'];
+                }
+                element = element.parentNode;
+            }
+        };
+
         jQuery("*").click(function(e) {
             var doc = $(this);
             var path = doc.getPath();
@@ -94,7 +103,15 @@
                 }
 
                 var data = elements.map(function(_elem) {
-                    return this.innerText
+                    var res = {
+                        text: this.innerText
+                    };
+
+                    var link = getLink(this);
+                    if(link) {
+                        res['link'] = link;
+                    }
+                    return res;
                 });
 
                 console.log(JSON.stringify(data.toArray(), null, 4));
