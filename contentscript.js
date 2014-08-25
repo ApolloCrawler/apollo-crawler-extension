@@ -37,6 +37,15 @@
         }
     };
 
+    var getImg = function (element) {
+        while (element) {
+            if (element.nodeName == 'IMG') {
+                return element['src'];
+            }
+            element = element.parentNode;
+        }
+    };
+
     var initializeSave = function () {
         console.log('Apolo: Initializing console.save()');
 
@@ -140,14 +149,29 @@
                 }
 
                 var data = elements.map(function (_elem) {
-                    var res = {
-                        text: this.innerText
-                    };
+                    var res = {};
 
+                    // Try to extract link
                     var link = getLink(this);
                     if (link) {
                         res['link'] = link;
                     }
+
+                    // Try to extract inner text
+                    var text = this.innerText;
+                    if(text) {
+                        text = text.trim();
+                        if(text != '') {
+                            res['text'] = text;
+                        }
+                    }
+
+                    // Try to extract image 
+                    var img = getImg(this);
+                    if(img) {
+                        res['img'] = img;
+                    }
+
                     return res;
                 });
 
