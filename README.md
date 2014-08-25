@@ -1,6 +1,8 @@
 # apollo-crawler-extension
 
-Simple visual point and click data extraction
+Simple visual point and click data extraction in your browser!
+
+![alt text](https://www.dropbox.com/s/d0vjbyzjjdnwqgv/apollocrawler-extension.png?dl=1 "Browser Image")
 
 ## Prerequisites
 
