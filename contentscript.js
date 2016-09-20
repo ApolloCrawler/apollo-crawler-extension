@@ -3,9 +3,15 @@
  */
 
 (function () {
-    var clickNo = 0;
-    var maxPathsCount = 2;
-    var paths = [];
+    var clickNo = null;
+    var minPathsCount = null;
+    var paths = null;
+
+    var initializeVariables = function() {
+        clickNo = 0;
+        minPathsCount = 2;
+        paths = [];
+    };
 
     /**
      * Prints selector of clicked element to console, very useful.
@@ -25,7 +31,11 @@
             return value.split('.')[0].split('#')[0];
         });
 
-        return result.join(' > ');
+        // paths.slice(0, 2);
+
+        var selector = result.join(' > ');
+
+        return selector;
     };
 
     var getLink = function (element) {
@@ -47,7 +57,7 @@
     };
 
     var initializeSave = function () {
-        console.log('Apolo: Initializing console.save()');
+        console.log('Apollo: Initializing console.save()');
 
         console.save = function (data, filename) {
 
@@ -75,7 +85,7 @@
     };
 
     var initializeGetPath = function() {
-        console.log('Apolo: Initializing jquery.getPath()');
+        console.log('Apollo: Initializing jquery.getPath()');
 
         jQuery.fn.getPath = function () {
             if (this.length != 1) {
@@ -120,71 +130,96 @@
         };
     };
 
-    var initializeHook = function () {
-        console.log('Apolo: Initializing click hook');
+    var clickHandler = function (e) {
+        var doc = jQuery(this);
+        var path = doc.getPath();
 
-        jQuery("*").click(function (e) {
-            var doc = $(this);
-            var path = doc.getPath();
+        paths[clickNo] = path;
 
-            paths[clickNo % maxPathsCount] = path;
+        // Print path
+        console.log('Apollo: Clicked path - ' + path);
 
-            // Print path
-            console.log('Apollo: Clicked - ' + path);
+        e.preventDefault();
+        e.stopPropagation();
 
-            e.preventDefault();
-            e.stopPropagation();
+        clickNo++;
 
-            clickNo++;
+        if (clickNo >= minPathsCount) {
+            var unipath = diff(paths);
 
-            if (clickNo % maxPathsCount == 0) {
-                var unipath = diff(paths);
+            console.log('Apollo: Unified path - ' + unipath);
 
-                console.log('Apollo: Unified path - ' + path);
+            var elements = jQuery(unipath);
+            if (elements) {
+                var randomColor = Math.floor(Math.random() * 16777215).toString(16);
+                var oldBorder = elements.css('border');
+                elements.css('border', '2px solid #' + randomColor);
 
-                var elements = jQuery(unipath);
-                if (elements) {
-                    var randomColor = Math.floor(Math.random() * 16777215).toString(16);
-                    elements.css('border', '2px solid #' + randomColor);
+                setTimeout(function() {
+                    elements.css('border', oldBorder);
+                }, 10000);
+            }
+
+            var data = elements.map(function (_elem) {
+                var res = {};
+
+                // Try to extract link
+                var link = getLink(this);
+                if (link) {
+                    res['link'] = link;
                 }
 
-                var data = elements.map(function (_elem) {
-                    var res = {};
-
-                    // Try to extract link
-                    var link = getLink(this);
-                    if (link) {
-                        res['link'] = link;
+                // Try to extract inner text
+                var text = this.innerText;
+                if(text) {
+                    text = text.trim();
+                    if(text != '') {
+                        res['text'] = text;
                     }
+                }
 
-                    // Try to extract inner text
-                    var text = this.innerText;
-                    if(text) {
-                        text = text.trim();
-                        if(text != '') {
-                            res['text'] = text;
-                        }
-                    }
+                // Try to extract image
+                var img = getImg(this);
+                if(img) {
+                    res['img'] = img;
+                }
 
-                    // Try to extract image 
-                    var img = getImg(this);
-                    if(img) {
-                        res['img'] = img;
-                    }
+                return res;
+            });
 
-                    return res;
-                });
+            var raw = {
+                clicked: paths,
+                selector: unipath,
+                data: data.toArray()
+            };
 
-                var raw = data.toArray();
-                var rawJson = JSON.stringify(raw, null, 4);
-                console.save(rawJson, 'data.json');
-                console.log(rawJson);
-            }
-        });
+            var rawJson = JSON.stringify(raw, null, 4);
+            console.save(rawJson, 'data.json');
+            console.log(rawJson);
+
+            // Uninstall click handler
+            // removeHook();
+        }
     };
 
+    var initializeHook = function () {
+        console.log('Apollo: Initializing click hook');
+
+        jQuery("*").bind('click', clickHandler);
+    };
+
+    var removeHook = function () {
+        jQuery("*").unbind('click', clickHandler);
+    }
+
     var initialize = function () {
-        console.log('Apolo: Initializing');
+        console.log('Apollo: Initializing');
+
+        // Reset variables
+        initializeVariables();
+
+        // Remove previous hook
+        removeHook();
 
         initializeSave();
 
@@ -192,21 +227,26 @@
 
         initializeHook();
 
-        console.log('Apolo: Initialized');
+        initialized = true;
+
+        console.log('Apollo: Initialized');
     };
 
-    if (window.jQuery) {
-        initialize();
-    } else {
-        console.log('Apolo: Injecting jQuery');
+    var main() {
+        if (window.jQuery && window.jQuery.fn.jquery === '3.1.0') {
+            console.log('Apollo: Using jQuery version ' + window.jQuery.fn.jquery);
+            initialize();
+        } else {
+            console.log('Apollo: Injecting jQuery');
 
-        var jq = document.createElement('script');
-        jq.src = "//ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js";
-        document.getElementsByTagName('head')[0].appendChild(jq);
-        setTimeout(function () {
+            var jq = document.createElement('script');
+            jq.src = "//ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js";
+            document.getElementsByTagName('head')[0].appendChild(jq);
             jQuery.noConflict();
             initialize();
-        }, 3000);
+        }
     }
 
+    // Run entry-point
+    main();
 }());
